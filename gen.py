@@ -30,7 +30,7 @@ excludeList = [
 ]
 
 rsyncExcludeString = "".join(["--exclude ", "{", ",".join(excludeList), "}"])
-tarExcludeString = " ".join(["--exclude \"" + x + "\"" for x in excludeList])
+tarExcludeString = " ".join([f"--exclude \"{x}\"" for x in excludeList])
 
 if mode == "rsync":
     # -n equivarents to --dry-run
