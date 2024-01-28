@@ -2,14 +2,13 @@
 
 This article introduces how to recover from a full backup of Linux system taken with rsync or tar archive.
 
-[TOC]
 
 ## Making backup
 
-First, here we have a helper script written in Python: this script just generates the final command that can be used for making backup, and note it is not something that automates everything in a whole workflow. This is currently compatible with making backup on `/` directory with either `rsync` or `tar` command. 
+First, here we have a helper script written in Python: this script just generates the final command that can be used for making backup. Note this script is not what automates every thing of whole backup workflow. This is currently compatible with making backup on `/` directory with either `rsync` or `tar` command. 
 
 ```bash
-python3 gen.py
+./main.py
 ```
 
 ## Recover from an image file : rsync
