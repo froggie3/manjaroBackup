@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
+from typing import Tuple
 import sys
-import textwrap
 
 
-def excludeList():
-    # note: exclusion in rsync allows using wildcard, but tar does not.
-    return [
+def exclude_list() -> Tuple[str]:
+    return (
         "dev/*",
         "proc/*",
         "sys/*",
@@ -15,54 +14,59 @@ def excludeList():
         "media/*",
         ".cache/*",
         "lost+found/*",
-    ]
+    )
 
 
-def concatExcludeList(mode, excludeList):
-    excludeList = {
-        "rsync": [f"--exclude='{x}'" for x in excludeList],
-        "tar": [f"--exclude='{x}'" for x in excludeList],
+def concat_exclude_list(command_type: str, excludes: Tuple[str]) -> Tuple[str] | None:
+    exclude_args_by_command_type = {
+        "rsync": tuple(f"--exclude='{x}'" for x in excludes),
+        "tar": tuple(f"--exclude='{x}'" for x in excludes),
     }
-    if mode in excludeList.keys():
-        return excludeList[mode]
-
-
-def getMessage(mode, SOURCE, DESTINATION):
-    excludeString = concatExcludeList(mode, excludeList())
-    if excludeString is None:
-        print(f"error: unsuported mode. supports only 'rsync' and 'tar'")
+    if command_type not in exclude_args_by_command_type.keys():
         return None
 
-    messages = {
+    return exclude_args_by_command_type[command_type]
+
+
+def get_message(command_type, src: str, dest: str) -> Tuple[str] | None:
+    exclude_string = concat_exclude_list(command_type, exclude_list())
+    if exclude_string is None:
+        print("error: unsuported mode. supports only 'rsync' and 'tar'")
+        return None
+
+    args_by_command_type = {
         # -n equivarents to --dry-run
         "rsync": (
-            "rsync", 
-            *excludeString, 
-            "-a", 
-            "-A", 
-            "-X", 
-            "-H", 
-            "-v", 
+            "rsync",
+            *exclude_string,
+            "-a",
+            "-A",
+            "-X",
+            "-H",
+            "-v",
             "-n",
-            SOURCE, 
-            DESTINATION,
+            src,
+            dest,
         ),
-        #"tar": f"tar -cvpzf {DESTINATION} {excludeString} --one-file-system {SOURCE}"
+        # "tar": f"tar -cvpzf {DESTINATION} {excludeString} --one-file-system {SOURCE}"
         "tar": (
-            'tar', 
-            *excludeString, 
-            '--zstd', 
-            '-c', 
-            '-v', 
-            '-p', 
-            '-f', 
-            DESTINATION, 
-            #'--one-file-system', 
-            SOURCE,
+            'tar',
+            *exclude_string,
+            '--zstd',
+            '-c',
+            '-v',
+            '-p',
+            '-f',
+            dest,
+            # '--one-file-system',
+            src,
         )
     }
+    return args_by_command_type[command_type]
 
-    string = " ".join(messages[mode])
+
+def show_message(last_args: Tuple[str]) -> None:
+    string = " ".join(last_args)
     print(string)
 
 
@@ -82,11 +86,10 @@ if __name__ == "__main__":
               "Examples:\n"
               f"  {sys.argv[0]} tar / /mnt/VOL1/backup.tar.gz\n"
               f"  {sys.argv[0]} rsync / /mnt/backup"
-        )
+              )
         sys.exit(1)
 
-    mode, SOURCE, DESTINATION = sys.argv[1:]
+    mode, source, destination = sys.argv[1:]
     # print(sys.argv[2:])
-    getMessage(mode, SOURCE, DESTINATION)
+    get_message(mode, source, destination)
     sys.exit(0)
-
