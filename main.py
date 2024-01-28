@@ -28,7 +28,7 @@ def concat_exclude_list(command_type: str, excludes: Tuple[str]) -> Tuple[str] |
     return exclude_args_by_command_type[command_type]
 
 
-def get_message(command_type, src: str, dest: str) -> Tuple[str] | None:
+def get_args(command_type, src: str, dest: str) -> Tuple[str] | None:
     exclude_string = concat_exclude_list(command_type, exclude_list())
     if exclude_string is None:
         print("error: unsuported mode. supports only 'rsync' and 'tar'")
@@ -65,7 +65,7 @@ def get_message(command_type, src: str, dest: str) -> Tuple[str] | None:
     return args_by_command_type[command_type]
 
 
-def show_message(last_args: Tuple[str]) -> None:
+def show_args(last_args: Tuple[str]) -> None:
     string = " ".join(last_args)
     print(string)
 
@@ -91,5 +91,7 @@ if __name__ == "__main__":
 
     mode, source, destination = sys.argv[1:]
     # print(sys.argv[2:])
-    get_message(mode, source, destination)
+    args = get_args(mode, source, destination)
+    show_args(args)
+
     sys.exit(0)
